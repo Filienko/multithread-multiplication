@@ -71,7 +71,7 @@ void *prod_worker(void *arg)
     Pthread_mutex_unlock(&mutex);
   }
 
-  return 1;
+  return 0;
 }
 
 // Matrix CONSUMER worker thread
@@ -126,5 +126,6 @@ void *cons_worker(void *arg)
     FreeMatrix(M1);
     FreeMatrix(M3);
   }
+  return 0;
 }
 

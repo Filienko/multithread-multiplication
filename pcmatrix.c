@@ -87,32 +87,41 @@ int main (int argc, char * argv[])
   // Seed the random number generator with the system time
   srand((unsigned) time(&t));
 
-  pthread_t p1;
-  pthread_t p2;
   bigmatrix = (Matrix **) malloc(sizeof(Matrix *) * BOUNDED_BUFFER_SIZE);
 
-  int loops = NUMBER_OF_MATRICES;
-  int i;
+  int i=0, prod_cuccess=0, cons_sucess = 0;
+  pthread_t *thread;
 
-  pthread_create(&p1, NULL, prod_worker, NULL);  // CREATE MATRIX PRODUCER THREAD
-  pthread_create(&p2, NULL, cons_worker, NULL);  // CREATE MATRIX CONSUMER THREAD
+  thread = (pthread_t *) malloc ((NUMWORK*2)*sizeof(pthread_t));
 
-  pthread_join(p1, NULL);
-  pthread_join(p2, NULL);
+  for (i=0;i<NUMWORK*2;i++){
+    prod_cuccess = pthread_create(&thread[i], NULL, prod_worker, NULL);  // CREATE MATRIX PRODUCER THREAD
+    i++;
+    cons_sucess = pthread_create(&thread[i], NULL, cons_worker, NULL);  // CREATE MATRIX CONSUMER THREAD
+    if(prod_cuccess != 0 || cons_sucess != 0)
+    {
+      printf("Failed thread, index: ",i);
+      exit(0);        
+    }
+  }
 
-  return 0;
-  // ----------------------------------------------------------
 
 
+  for(i=0;i<NUMWORK*2;i++){
+    prod_cuccess = pthread_join(thread[i],NULL);
+    i++;
+    cons_sucess = pthread_join(thread[i],NULL);
+    if(prod_cuccess != 0 || cons_sucess != 0)
+    {
+      printf("Failed thread, index: ",i);
+      exit(0);        
+    }
+  }
 
   printf("Producing %d matrices in mode %d.\n",NUMBER_OF_MATRICES,MATRIX_MODE);
   printf("Using a shared buffer of size=%d\n", BOUNDED_BUFFER_SIZE);
   printf("With %d producer and consumer thread(s).\n",numw);
   printf("\n");
-
-  // Here is an example to define one producer and one consumer
-  pthread_t pr;
-  pthread_t co;
 
   // Add your code here to create threads and so on
 

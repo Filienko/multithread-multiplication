@@ -84,39 +84,42 @@ int main (int argc, char * argv[])
   }
 
   time_t t;
+
+
   // Seed the random number generator with the system time
   srand((unsigned) time(&t));
 
   bigmatrix = (Matrix **) malloc(sizeof(Matrix *) * BOUNDED_BUFFER_SIZE);
 
-  int i=0, prod_cuccess=0, cons_sucess = 0;
-  pthread_t *thread;
+  int i=0, prod_success=0, cons_sucess = 0;
+  pthread_t thread_con;
+  pthread_t thread_prod;
+  prod_success = pthread_create(&thread_prod, NULL, *prod_worker, NULL);  // CREATE MATRIX PRODUCER THREAD
+  cons_sucess = pthread_create(&thread_con, NULL, *cons_worker, NULL);  // CREATE MATRIX PRODUCER THREAD
 
-  thread = (pthread_t *) malloc ((NUMWORK*2)*sizeof(pthread_t));
+  // thread = (pthread_t *) malloc ((NUMWORK*2)*sizeof(pthread_t));
 
-  for (i=0;i<NUMWORK*2;i++){
-    prod_cuccess = pthread_create(&thread[i], NULL, *prod_worker, NULL);  // CREATE MATRIX PRODUCER THREAD
-    i++;
-    cons_sucess = pthread_create(&thread[i], NULL, *cons_worker, NULL);  // CREATE MATRIX CONSUMER THREAD
-    if(prod_cuccess != 0 || cons_sucess != 0)
-    {
-      printf("Failed thread, index:  %i",i);
-      exit(0);        
-    }
-  }
+  // for (i=0;i<NUMWORK*2;i++){
+  //   prod_success = pthread_create(&thread[i], NULL, *prod_worker, NULL);  // CREATE MATRIX PRODUCER THREAD
+  //   i++;
+  //   cons_sucess = pthread_create(&thread[i], NULL, *cons_worker, NULL);  // CREATE MATRIX CONSUMER THREAD
+  //   if(prod_success != 0 || cons_sucess != 0)
+  //   {
+  //     printf("Failed thread, index:  %i",i);
+  //     exit(0);        
+  //   }
+  // }
 
-
-
-  for(i=0;i<NUMWORK*2;i++){
-    prod_cuccess = pthread_join(thread[i],NULL);
-    i++;
-    cons_sucess = pthread_join(thread[i],NULL);
-    if(prod_cuccess != 0 || cons_sucess != 0)
-    {
-      printf("Failed thread, index: %i",i);
-      exit(0);        
-    }
-  }
+  // for(i=0;i<NUMWORK*2;i++){
+  //   prod_success = pthread_join(thread[i],NULL);
+  //   i++;
+  //   cons_sucess = pthread_join(thread[i],NULL);
+  //   if(prod_success != 0 || cons_sucess != 0)
+  //   {
+  //     printf("Failed thread, index: %i",i);
+  //     exit(0);        
+  //   }
+  // }
 
   printf("Producing %d matrices in mode %d.\n",NUMBER_OF_MATRICES,MATRIX_MODE);
   printf("Using a shared buffer of size=%d\n", BOUNDED_BUFFER_SIZE);

@@ -7,6 +7,8 @@
  */
 
 // Number of worker threads - NUMWORK producers, NUMWORK consumers
+#include <pthread.h>
+
 #define NUMWORK 1
 
 // Constant for enabling and disabling DEBUG output

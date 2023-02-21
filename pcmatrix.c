@@ -95,12 +95,12 @@ int main (int argc, char * argv[])
   thread = (pthread_t *) malloc ((NUMWORK*2)*sizeof(pthread_t));
 
   for (i=0;i<NUMWORK*2;i++){
-    prod_cuccess = pthread_create(&thread[i], NULL, prod_worker, NULL);  // CREATE MATRIX PRODUCER THREAD
+    prod_cuccess = pthread_create(&thread[i], NULL, *prod_worker, NULL);  // CREATE MATRIX PRODUCER THREAD
     i++;
-    cons_sucess = pthread_create(&thread[i], NULL, cons_worker, NULL);  // CREATE MATRIX CONSUMER THREAD
+    cons_sucess = pthread_create(&thread[i], NULL, *cons_worker, NULL);  // CREATE MATRIX CONSUMER THREAD
     if(prod_cuccess != 0 || cons_sucess != 0)
     {
-      printf("Failed thread, index: ",i);
+      printf("Failed thread, index:  %i",i);
       exit(0);        
     }
   }
@@ -113,7 +113,7 @@ int main (int argc, char * argv[])
     cons_sucess = pthread_join(thread[i],NULL);
     if(prod_cuccess != 0 || cons_sucess != 0)
     {
-      printf("Failed thread, index: ",i);
+      printf("Failed thread, index: %i",i);
       exit(0);        
     }
   }

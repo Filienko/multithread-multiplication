@@ -37,6 +37,7 @@ int put(Matrix * value)
   bigmatrix[fill_ptr] = value;
   fill_ptr = (fill_ptr + 1) % MAX;
   count->value=+1;
+  return 0;
 }
 
 Matrix * get()
@@ -54,21 +55,21 @@ void *prod_worker(void *arg)
   
   while(1)
   {
-    Pthread_mutex_lock(&mutex);
+    pthread_mutex_lock(&mutex);
     while (get_cnt(count) == MAX)
-      Pthread_cond_wait(&empty, &mutex);
+      pthread_cond_wait(&empty, &mutex);
     if(get_cnt(matrix_produced) < LOOPS)
     {
       put(matrix);
       increment_cnt(matrix_produced);
-      Pthread_cond_signal(&fill);
+      pthread_cond_signal(&fill);
     }
     else
     {
-      Pthread_mutex_unlock(&mutex);
+      pthread_mutex_unlock(&mutex);
       return 0;
     }
-    Pthread_mutex_unlock(&mutex);
+    pthread_mutex_unlock(&mutex);
   }
 
   return 0;
@@ -82,7 +83,7 @@ void *cons_worker(void *arg)
   Matrix* M3;
   
   pthread_mutex_lock(&mutex);
-  while(get(matrix_consumed) < LOOPS)
+  while(get_cnt(matrix_consumed) < LOOPS)
   {
     while (get_cnt(count) == 0)
       pthread_cond_wait(&fill, &mutex);
@@ -94,9 +95,9 @@ void *cons_worker(void *arg)
       pthread_mutex_unlock(&mutex);
     }
 
-    if(get(matrix_consumed) >= LOOPS)
+    if(get_cnt(matrix_consumed) >= LOOPS)
     {
-      Pthread_mutex_unlock(&mutex);
+      pthread_mutex_unlock(&mutex);
       return 0;
     }
 
@@ -104,11 +105,11 @@ void *cons_worker(void *arg)
     {
       pthread_mutex_lock(&mutex);
       while (get_cnt(count) == 0)
-        thread_cond_wait(&fill, &mutex);
+        pthread_cond_wait(&fill, &mutex);
       
-      if(get(matrix_consumed) >= LOOPS)
+      if(get_cnt(matrix_consumed) >= LOOPS)
       {
-        Pthread_mutex_unlock(&mutex);
+        pthread_mutex_unlock(&mutex);
         return 0;
       }
 

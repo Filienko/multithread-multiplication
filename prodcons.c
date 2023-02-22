@@ -47,10 +47,11 @@ Matrix* get()
 }
 
 // Matrix PRODUCER worker thread
-void *prod_worker(void *matrix_prod)
+void *prod_worker(void *matrix_produced)
 {  
   printf("Started the prod\n");
-  counter_t* matrix_produced = matrix_prod;
+  counter_t* matrix_produced = &matrix_produced;
+  ProdConsStats produced;
 
   while(1)
   {
@@ -68,19 +69,20 @@ void *prod_worker(void *matrix_prod)
     else
     {
       pthread_mutex_unlock(&mutex);
-      return 0;
+      return matrix_produced;
     }
     pthread_mutex_unlock(&mutex);
   }
-
-  return 0;
+  return matrix_produced;
 }
 
 // Matrix CONSUMER worker thread
 void *cons_worker(void *matrix_cons)
 {
+  ProdConsStats consumed;
+
   printf("Started the cons\n");
-  counter_t* matrix_consumed = matrix_cons;
+  counter_t* matrix_consumed = &matrix_cons;
 
   Matrix* M1 = (Matrix *) malloc(sizeof(Matrix));
   Matrix* M2 = (Matrix *) malloc(sizeof(Matrix));
@@ -102,7 +104,7 @@ void *cons_worker(void *matrix_cons)
     if(get_cnt(matrix_consumed) >= LOOPS)
     {
       pthread_mutex_unlock(&mutex);
-      return 0;
+      return matrix_consumed;
     }
 
     do
@@ -114,7 +116,7 @@ void *cons_worker(void *matrix_cons)
       if(get_cnt(matrix_consumed) >= LOOPS)
       {
         pthread_mutex_unlock(&mutex);
-        return 0;
+        return matrix_consumed;
       }
 
       if(count != 0)
@@ -132,6 +134,6 @@ void *cons_worker(void *matrix_cons)
     FreeMatrix(M2);
     FreeMatrix(M3);
   }
-  return 0;
+  return matrix_consumed;
 }
 

@@ -57,20 +57,22 @@ void *prod_worker(void *matrix_prod)
     Matrix* matrix = GenMatrixRandom();
     // printf("Produced the matrix in the prod\n");
     pthread_mutex_lock(&mutex);
-    while (count == BOUNDED_BUFFER_SIZE)
+    //if bounded buffer full and there is more matrices to produce, wait to consume
+    while (count == BOUNDED_BUFFER_SIZE && get_cnt(matrix_produced) < NUMBER_OF_MATRICES)
       pthread_cond_wait(&empty, &mutex);
+    
     if(get_cnt(matrix_produced) < NUMBER_OF_MATRICES)
     {
       put(matrix);
       increment_cnt(matrix_produced);
       pthread_cond_signal(&fill);
+      pthread_mutex_unlock(&mutex);
     }
     else
     {
       pthread_mutex_unlock(&mutex);
       return 0;
     }
-    pthread_mutex_unlock(&mutex);
   }
 
   return 0;
@@ -89,8 +91,9 @@ void *cons_worker(void *matrix_cons)
   pthread_mutex_lock(&mutex);
   while(get_cnt(matrix_consumed) < NUMBER_OF_MATRICES)
   {
-    while (count == 0)
+    while (count == 0 && get_cnt(matrix_consumed) < NUMBER_OF_MATRICES)
       pthread_cond_wait(&fill, &mutex);
+      
     if(count != 0)
     {
       M1 = get();
@@ -99,25 +102,19 @@ void *cons_worker(void *matrix_cons)
       pthread_mutex_unlock(&mutex);
     }
 
-    if(get_cnt(matrix_consumed) >= NUMBER_OF_MATRICES)
-    {
-      pthread_mutex_unlock(&mutex);
-      return 0;
-    }
-
     do
     {
-      pthread_mutex_lock(&mutex);
-      while (count == 0)
-        pthread_cond_wait(&fill, &mutex);
-      
+      pthread_mutex_lock(&mutex);      
       if(get_cnt(matrix_consumed) >= NUMBER_OF_MATRICES)
       {
         pthread_mutex_unlock(&mutex);
         return 0;
       }
+      
+      while (count == 0 && get_cnt(matrix_consumed) < NUMBER_OF_MATRICES)
+        pthread_cond_wait(&fill, &mutex);
 
-      if(count != 0)
+      if(count > 0)
       {
         M2 = get();
         increment_cnt(matrix_consumed);

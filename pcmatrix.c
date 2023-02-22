@@ -85,17 +85,32 @@ int main (int argc, char * argv[])
 
   time_t t;
 
+  printf("Hello");
 
   // Seed the random number generator with the system time
   srand((unsigned) time(&t));
+  printf("Hello");
 
   bigmatrix = (Matrix **) malloc(sizeof(Matrix *) * BOUNDED_BUFFER_SIZE);
+  printf("Hello");
+  counter_t* matrix_prod = malloc(sizeof(counter_t));
+  printf("Hello");
+  init_cnt(matrix_prod);
+  counter_t* matrix_cons = malloc(sizeof(counter_t));
+  init_cnt(matrix_cons);
 
   int i=0, prod_success=0, cons_sucess = 0;
+
   pthread_t thread_con;
   pthread_t thread_prod;
-  prod_success = pthread_create(&thread_prod, NULL, *prod_worker, NULL);  // CREATE MATRIX PRODUCER THREAD
-  cons_sucess = pthread_create(&thread_con, NULL, *cons_worker, NULL);  // CREATE MATRIX PRODUCER THREAD
+  printf("Hello");
+  prod_success = pthread_create(&thread_prod, NULL, prod_worker, (void *) matrix_prod);  // CREATE MATRIX PRODUCER THREAD
+  printf("World");
+
+  cons_sucess = pthread_create(&thread_con, NULL, cons_worker, (void *) matrix_cons);  // CREATE MATRIX PRODUCER THREAD
+  printf("World1");
+  pthread_join(thread_prod, NULL);
+  pthread_join(thread_con, NULL);
 
   // thread = (pthread_t *) malloc ((NUMWORK*2)*sizeof(pthread_t));
 

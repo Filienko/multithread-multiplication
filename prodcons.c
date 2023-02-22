@@ -47,20 +47,19 @@ Matrix* get()
 }
 
 // Matrix PRODUCER worker thread
-void *prod_worker(void *matrix_produced)
+void *prod_worker(void *matrix_prod)
 {  
-  printf("Started the prod\n");
-  counter_t* matrix_produced = &matrix_produced;
-  ProdConsStats produced;
+  // printf("Started the prod\n");
+  counter_t* matrix_produced = matrix_prod;
 
   while(1)
   {
     Matrix* matrix = GenMatrixRandom();
-    printf("Produced the matrix in the prod\n");
+    // printf("Produced the matrix in the prod\n");
     pthread_mutex_lock(&mutex);
     while (count == BOUNDED_BUFFER_SIZE)
       pthread_cond_wait(&empty, &mutex);
-    if(get_cnt(matrix_produced) < LOOPS)
+    if(get_cnt(matrix_produced) < NUMBER_OF_MATRICES)
     {
       put(matrix);
       increment_cnt(matrix_produced);
@@ -69,27 +68,26 @@ void *prod_worker(void *matrix_produced)
     else
     {
       pthread_mutex_unlock(&mutex);
-      return matrix_produced;
+      return 0;
     }
     pthread_mutex_unlock(&mutex);
   }
-  return matrix_produced;
+
+  return 0;
 }
 
 // Matrix CONSUMER worker thread
 void *cons_worker(void *matrix_cons)
 {
-  ProdConsStats consumed;
-
-  printf("Started the cons\n");
-  counter_t* matrix_consumed = &matrix_cons;
+  // printf("Started the cons\n");
+  counter_t* matrix_consumed = matrix_cons;
 
   Matrix* M1 = (Matrix *) malloc(sizeof(Matrix));
   Matrix* M2 = (Matrix *) malloc(sizeof(Matrix));
   Matrix* M3 = (Matrix *) malloc(sizeof(Matrix));
   
   pthread_mutex_lock(&mutex);
-  while(get_cnt(matrix_consumed) < LOOPS)
+  while(get_cnt(matrix_consumed) < NUMBER_OF_MATRICES)
   {
     while (count == 0)
       pthread_cond_wait(&fill, &mutex);
@@ -101,10 +99,10 @@ void *cons_worker(void *matrix_cons)
       pthread_mutex_unlock(&mutex);
     }
 
-    if(get_cnt(matrix_consumed) >= LOOPS)
+    if(get_cnt(matrix_consumed) >= NUMBER_OF_MATRICES)
     {
       pthread_mutex_unlock(&mutex);
-      return matrix_consumed;
+      return 0;
     }
 
     do
@@ -113,10 +111,10 @@ void *cons_worker(void *matrix_cons)
       while (count == 0)
         pthread_cond_wait(&fill, &mutex);
       
-      if(get_cnt(matrix_consumed) >= LOOPS)
+      if(get_cnt(matrix_consumed) >= NUMBER_OF_MATRICES)
       {
         pthread_mutex_unlock(&mutex);
-        return matrix_consumed;
+        return 0;
       }
 
       if(count != 0)
@@ -125,15 +123,15 @@ void *cons_worker(void *matrix_cons)
         increment_cnt(matrix_consumed);
         pthread_mutex_unlock(&mutex);
         M3 = MatrixMultiply(M1, M2);
-        printf("Calculate Matrix");
+        // printf("Calculate Matrix\n");
       }
     } while(!M3);
-    printf("Display Matrix");
+    // printf("Display Matrix\n");
     DisplayMatrix(M3,stdout);
     FreeMatrix(M1);
     FreeMatrix(M2);
     FreeMatrix(M3);
   }
-  return matrix_consumed;
+  return 0;
 }
 

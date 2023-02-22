@@ -85,16 +85,11 @@ int main (int argc, char * argv[])
 
   time_t t;
 
-  printf("Hello");
-
   // Seed the random number generator with the system time
   srand((unsigned) time(&t));
-  printf("Hello");
 
   bigmatrix = (Matrix **) malloc(sizeof(Matrix *) * BOUNDED_BUFFER_SIZE);
-  printf("Hello");
   counter_t* matrix_prod = malloc(sizeof(counter_t));
-  printf("Hello");
   init_cnt(matrix_prod);
   counter_t* matrix_cons = malloc(sizeof(counter_t));
   init_cnt(matrix_cons);
@@ -103,12 +98,9 @@ int main (int argc, char * argv[])
 
   pthread_t thread_con;
   pthread_t thread_prod;
-  printf("Hello");
   prod_success = pthread_create(&thread_prod, NULL, prod_worker, (void *) matrix_prod);  // CREATE MATRIX PRODUCER THREAD
-  printf("World");
 
   cons_sucess = pthread_create(&thread_con, NULL, cons_worker, (void *) matrix_cons);  // CREATE MATRIX PRODUCER THREAD
-  printf("World1");
   pthread_join(thread_prod, NULL);
   pthread_join(thread_con, NULL);
 
@@ -155,7 +147,7 @@ int main (int argc, char * argv[])
   // add up total matrix stats in prs, cos, prodtot, constot, consmul
 
   printf("Sum of Matrix elements --> Produced=%d = Consumed=%d\n",prs,cos);
-  printf("Matrices produced=%i consumed=%i multiplied=%d\n",prod_success,cons_sucess,consmul);
+  printf("Matrices produced=%d consumed=%d multiplied=%d\n",prodtot,constot,consmul);
 
   return 0;
 }

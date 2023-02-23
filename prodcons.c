@@ -88,9 +88,10 @@ void *cons_worker(void *matrix_cons)
   Matrix* M2 = (Matrix *) malloc(sizeof(Matrix));
   Matrix* M3 = (Matrix *) malloc(sizeof(Matrix));
   
-  pthread_mutex_lock(&mutex);
+  //pthread_mutex_lock(&mutex);
   while(get_cnt(matrix_consumed) < NUMBER_OF_MATRICES)
   {
+    pthread_mutex_lock(&mutex);
     while (count == 0 && get_cnt(matrix_consumed) < NUMBER_OF_MATRICES)
       pthread_cond_wait(&fill, &mutex);
       
@@ -118,8 +119,12 @@ void *cons_worker(void *matrix_cons)
       {
         M2 = get();
         increment_cnt(matrix_consumed);
+        pthread_cond_signal(&empty);
         pthread_mutex_unlock(&mutex);
         M3 = MatrixMultiply(M1, M2);
+        if (!M3) {
+            FreeMatrix(M2);
+        }
         // printf("Calculate Matrix\n");
       }
     } while(!M3);

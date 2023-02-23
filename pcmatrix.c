@@ -100,7 +100,7 @@ int main (int argc, char * argv[])
   pthread_t thread_prod;
   prod_success = pthread_create(&thread_prod, NULL, prod_worker, (void *) matrix_prod);  // CREATE MATRIX PRODUCER THREAD
 
-  cons_sucess = pthread_create(&thread_con, NULL, cons_worker, (void *) matrix_cons);  // CREATE MATRIX PRODUCER THREAD
+  cons_sucess = pthread_create(&thread_con, NULL, cons_worker, (void *) matrix_cons);  // CREATE MATRIX CONSUMER THREAD
   pthread_join(thread_prod, NULL);
   pthread_join(thread_con, NULL);
 

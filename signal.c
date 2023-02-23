@@ -1,4 +1,4 @@
-/*
+/**
  *  Signal example
  *  Based on Operating Systems: Three Easy Pieces by R. Arpaci-Dusseau and A. Arpaci-Dusseau
  *

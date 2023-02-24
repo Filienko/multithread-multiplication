@@ -118,11 +118,11 @@ int main (int argc, char * argv[])
     pthread_join(thread[i],&consumed);
     ProdConsStats* produced_stats = (ProdConsStats*)produced;
     ProdConsStats* consumed_stats = (ProdConsStats*)consumed;
-    prs = prs + produced_stats->matrixtotal;
-    cos = cos + consumed_stats->matrixtotal;
-    prodtot = prodtot + produced_stats->sumtotal;
-    constot = constot + consumed_stats->sumtotal;
-    consmul = consmul + consumed_stats->multtotal;
+    prs += produced_stats->sumtotal;
+    cos += consumed_stats->sumtotal;
+    prodtot += produced_stats->matrixtotal;
+    constot += consumed_stats->matrixtotal;
+    consmul += consumed_stats->multtotal;
   }
 
 

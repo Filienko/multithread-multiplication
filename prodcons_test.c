@@ -45,7 +45,6 @@ void *prod_worker(void *matrix_prod)
   while(1)
   {
     Matrix* matrix = GenMatrixRandom();
-
     pthread_mutex_lock(&mutex);
     //if bounded buffer full and there is more matrices to produce, wait to consume
     while (count == BOUNDED_BUFFER_SIZE && get_cnt(matrix_produced) < NUMBER_OF_MATRICES)
@@ -54,6 +53,7 @@ void *prod_worker(void *matrix_prod)
     if(get_cnt(matrix_produced) < NUMBER_OF_MATRICES)
     {
       put(matrix);
+      produced_stats->sumtotal += SumMatrix(matrix);
       increment_cnt(matrix_produced);
       produced_stats->matrixtotal++;
       pthread_cond_signal(&fill);
@@ -88,6 +88,7 @@ void *cons_worker(void *matrix_cons)
     if(count != 0)
     {
       M1 = get();
+      consumed_stats->sumtotal += SumMatrix(M1);
       increment_cnt(matrix_consumed);
       consumed_stats->matrixtotal++;
       pthread_cond_signal(&empty);
@@ -106,21 +107,22 @@ void *cons_worker(void *matrix_cons)
       while (count == 0 && get_cnt(matrix_consumed) < NUMBER_OF_MATRICES)
         pthread_cond_wait(&fill, &mutex);
 
-      if(count > 0)
+      if(count > 0 && get_cnt(matrix_consumed) < NUMBER_OF_MATRICES)
       {
         M2 = get();
+        consumed_stats->sumtotal += SumMatrix(M2);
         increment_cnt(matrix_consumed);
         consumed_stats->matrixtotal++;
         pthread_cond_signal(&empty);
-        pthread_mutex_unlock(&mutex);
         M3 = MatrixMultiply(M1, M2);
+        pthread_mutex_unlock(&mutex);
         if (!M3) {
-            FreeMatrix(M2);
+          FreeMatrix(M2);
         }
       }
     } while(!M3);
-    DisplayMatrix(M3,stdout);
     consumed_stats->multtotal++;
+    DisplayMatrix(M3,stdout);
     FreeMatrix(M1);
     FreeMatrix(M2);
     FreeMatrix(M3);

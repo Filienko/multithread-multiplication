@@ -102,11 +102,11 @@ void *cons_worker(void *matrix_cons)
   Matrix* M2 = NULL;
   Matrix* M3 = NULL;
 
-  // if(get_cnt(matrix_consumed) >= NUMBER_OF_MATRICES)
-  // {
-  //   done = 1; 
-  //   pthread_mutex_lock(&mutex);
-  // }
+  if(get_cnt(matrix_consumed) >= NUMBER_OF_MATRICES)
+  {
+    done = 1; 
+    pthread_mutex_lock(&mutex);
+  }
   
   while(!done)
   {
@@ -131,11 +131,8 @@ void *cons_worker(void *matrix_cons)
 
     pthread_mutex_unlock(&mutex);
 
-    // pthread_mutex_lock(&mutex);      
-
     if (M1) 
     {
-    // pthread_mutex_unlock(&mutex);
       while (!(done || M3)) {
         pthread_mutex_lock(&mutex); 
         
@@ -168,22 +165,17 @@ void *cons_worker(void *matrix_cons)
           pthread_mutex_unlock(&mutex);
         }   
       } 
+    } 
+    else if(done)
+    {
+      pthread_mutex_lock(&mutex); 
     }
-
-    // if(get_cnt(matrix_consumed) >= NUMBER_OF_MATRICES)
-    // {
-    //   done = 1;
-    // }
-    // else
-    // {
-    //   pthread_mutex_unlock(&mutex);
-    // }
-
 
     if (M1) {
       FreeMatrix(M1);
       M1 = NULL;
-    }
+    } 
+
     if (M2) {
       FreeMatrix(M2);
       M2 = NULL;

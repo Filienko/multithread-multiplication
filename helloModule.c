@@ -15,16 +15,16 @@ struct Stats proc_count(void);
 int virt2phys(struct task_struct* task, unsigned long virt)
 {
   pgd_t *pgd;
-  pgd_t *p4d;
-  pgd_t *pud;
-  pgd_t *pmd;
-  pgd_t *pte;
+  p4d_t *p4d;
+  pud_t *pud;
+  pmd_t *pmd;
+  pte_t *pte;
   struct page *page;
   pgd = pgd_offset(task->mm, virt);
   unsigned long phys;
   if (pgd_none(*pgd) || pgd_bad(*pgd))
       return 0;
-  p4d = p4d_offset(p4d, virt);
+  p4d = p4d_offset(pgd, virt);
   if (p4d_none(*p4d) || p4d_bad(*p4d))
       return 0;
   pud = pud_offset(p4d, virt);

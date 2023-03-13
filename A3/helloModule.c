@@ -21,7 +21,7 @@ int virt2phys(struct task_struct* task, unsigned long virt)
   pte_t *pte;
   struct page *page;
   pgd = pgd_offset(task->mm, virt);
-  unsigned long phys;
+  unsigned long phys = 0;
   if (pgd_none(*pgd) || pgd_bad(*pgd))
       return 0;
   p4d = p4d_offset(pgd, virt);
@@ -41,7 +41,7 @@ int virt2phys(struct task_struct* task, unsigned long virt)
   pte_unmap(pte);
   if (phys == 70368744173568)
     return 0;
-  return phys;
+  return 1;
 }
 
 int proc_init(void) {
@@ -69,28 +69,45 @@ static struct Stats pages_count(struct task_struct* task)
   pages_totals.total_con = 0;
   pages_totals.total_noncon = 0;
   pages_totals.total_pages = 0;
-  unsigned long con_pages = 0;
+  unsigned long con_pages = 1;
   unsigned long total_pages = 0;
   struct vm_area_struct *vma = 0;
   unsigned long vpage;
+  int prev_page_present = 0;
   if (task->mm && task->mm->mmap)
-    for (vma = task->mm->mmap; vma; vma = vma->vm_next)
+  {
+    for (vma = task->mm->mmap; vma != NULL; vma = vma->vm_next)
+    {
       for (vpage = vma->vm_start; vpage<vma->vm_end;vpage+=PAGE_SIZE)
       {
+        
         //HIGH LEVEL LOGIC TO FIND NUMBER OF CONTINUOUS PAGES PER PROCESS
-        if ((vma->vm_next == NULL || vma->vm_next->vm_start != vma->vm_end)) 
+        if(prev_page_present == 1 && virt2phys(task,vpage) != 0)
         {
-          con_pages += (vma->vm_end - vma->vm_start) >> PAGE_SHIFT;
+          //HIGH LEVEL LOGIC TO FIND TOTAL NUMBER OF PAGES PER PROCESS
+          con_pages++;
+          total_pages++;
         }
-        //HIGH LEVEL LOGIC TO FIND TOTAL NUMBER OF PAGES PER PROCESS
-        if(virt2phys(task,vpage) != 0)
+        else if (virt2phys(task,vpage) != 0)
         {
-          //HIGH LEVEL LOGIC
-          total_pages += total_pages + 1;
+          total_pages++;
         }
+        prev_page_present = virt2phys(task,vpage);
+        //         //HIGH LEVEL LOGIC TO FIND NUMBER OF CONTINUOUS PAGES PER PROCESS
+        // if ((vma->vm_next == NULL || vma->vm_next->vm_start != vma->vm_end)) 
+        // {
+        //   con_pages += (vma->vm_end - vma->vm_start) >> PAGE_SHIFT;
+        // }
       }
+    }
+  }
+  //Adjust if no pages exist, assume one entry is not sufficient to be counter contiuous
+  if(con_pages == 1)
+  {
+    con_pages = 0;
+  }
   pages_totals.total_con = con_pages;
-  pages_totals.total_noncon = total_pages - con_pages;
+  pages_totals.total_noncon = (total_pages - con_pages);
   pages_totals.total_pages = total_pages;
 
   return pages_totals;

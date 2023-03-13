@@ -100,7 +100,7 @@ struct Stats proc_count()
   struct Stats counter_totals;
   counter_totals.total_con = 0;
   counter_totals.total_noncon = 0;
-  counter_totals.total = 0;
+  counter_totals.total_pages = 0;
   unsigned long total_pages =0;
   unsigned long total_con_pages =0;
   unsigned long total_noncon_pages =0;
@@ -117,13 +117,13 @@ struct Stats proc_count()
       counter_totals = pages_count(thechild);
 
       //Total number of memory pages allocated for the process
-      total_pages = total_pages + counter_totals.total;
+      total_pages = total_pages + counter_totals.total_pages;
       //Total number of contiguously memory pages allocated for the process
       total_con_pages = total_con_pages + counter_totals.total_con;
       //Total number of non-contiguously memory pages allocated for the process
       total_noncon_pages = total_noncon_pages + counter_totals.total_noncon;
 
-      printk(KERN_INFO "%lu, %s, %lu, %lu, %lu\n", proc_id, proc_name, counter_totals.total_con,counter_totals.total_noncon,counter_totals.total);
+      printk(KERN_INFO "%lu, %s, %lu, %lu, %lu\n", proc_id, proc_name, counter_totals.total_con,counter_totals.total_noncon,counter_totals.total_pages);
     }
   }
 

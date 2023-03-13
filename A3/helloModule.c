@@ -82,7 +82,7 @@ static struct Stats pages_count(struct task_struct* task)
       {
         
         //HIGH LEVEL LOGIC TO FIND NUMBER OF CONTINUOUS PAGES PER PROCESS
-        if(prev_page_present == 1 && virt2phys(task,vpage) != 0)
+        if(prev_page_present != 0 && virt2phys(task,vpage) != 0)
         {
           //HIGH LEVEL LOGIC TO FIND TOTAL NUMBER OF PAGES PER PROCESS
           con_pages++;

@@ -69,8 +69,8 @@ static struct Stats pages_count(struct task_struct* task)
   pages_totals.total_con = 0;
   pages_totals.total_noncon = 0;
   pages_totals.total_pages = 0;
-  int con_pages = 0;
-  int total_pages = 0;
+  unsigned long con_pages = 0;
+  unsigned long total_pages = 0;
   struct vm_area_struct *vma = 0;
   unsigned long vpage;
   if (task->mm && task->mm->mmap)
@@ -100,8 +100,10 @@ struct Stats proc_count()
   struct Stats counter_totals;
   counter_totals.total_con = 0;
   counter_totals.total_noncon = 0;
-  counter_totals.total_pages = 0;
-
+  counter_totals.total = 0;
+  unsigned long total_pages =0;
+  unsigned long total_con_pages =0;
+  unsigned long total_noncon_pages =0;
   struct task_struct *thechild;
   for_each_process(thechild)
   {
@@ -114,16 +116,21 @@ struct Stats proc_count()
 
       counter_totals = pages_count(thechild);
 
-      // //Total number of memory pages allocated for the process
-      // unsigned long total_pages = thechild->mm->total_vm;
-      // //Total number of contiguously memory pages allocated for the process
-      // unsigned long total_con_pages = total_pages - thechild->mm->nr_ptes;
-      // //Total number of non-contiguously memory pages allocated for the process
-      // unsigned longt total_noncon_pages = thechild->mm->nr_ptes;
+      //Total number of memory pages allocated for the process
+      total_pages = total_pages + counter_totals.total;
+      //Total number of contiguously memory pages allocated for the process
+      total_con_pages = total_con_pages + counter_totals.total_con;
+      //Total number of non-contiguously memory pages allocated for the process
+      total_noncon_pages = total_noncon_pages + counter_totals.total_noncon;
 
-      printk(KERN_INFO "%lu, %s, %lu, %lu, %lu\n", proc_id, proc_name, counter_totals.total_con,counter_totals.total_noncon,counter_totals.total_pages);
+      printk(KERN_INFO "%lu, %s, %lu, %lu, %lu\n", proc_id, proc_name, counter_totals.total_con,counter_totals.total_noncon,counter_totals.total);
     }
   }
+
+  counter_totals.total_con = total_pages;
+  counter_totals.total_noncon = total_noncon_pages;
+  counter_totals.total_pages = total_con_pages;
+
  return counter_totals;
 }
 
